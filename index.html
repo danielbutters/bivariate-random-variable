@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Coordinate System with Bivariate CDF</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+            font-family: 'Press Start 2P', monospace;
+            color: #ffffff;
+            image-rendering: pixelated;
+        }
+        #container {
+            width: 100vw;
+            height: 100vh;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #ffffff;
+            background: #4a2a6a;
+            padding: 20px;
+            border: 3px solid #ff00ff;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            border-radius: 8px;
+        }
+        #toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #2a6a4a;
+            padding: 20px;
+            border: 3px solid #00ffff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        .toggle-btn {
+            background: #1a1a1a;
+            border: 3px solid #ffff00;
+            color: #ffff00;
+            padding: 12px 20px;
+            margin: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            text-shadow: 2px 2px 0px #000;
+            box-shadow: 0 4px 0 #888;
+        }
+        .toggle-btn:hover {
+            background: #ffff00;
+            color: #1a1a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #888;
+        }
+        .toggle-btn:active {
+            transform: translateY(0px);
+            box-shadow: 0 2px 0 #888;
+        }
+        .toggle-btn.active {
+            background: #ffff00;
+            color: #1a1a1a;
+            border-color: #ffff00;
+            box-shadow: 0 4px 0 #ff8800;
+        }
+        h3, h4 {
+            margin: 0 0 15px 0;
+            color: #ffff00;
+            text-shadow: 2px 2px 0px #000;
+            font-size: 14px;
+        }
+        p {
+            margin: 8px 0;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        .highlight {
+            color: #ff8800;
+            font-weight: bold;
+        }
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(255, 0, 255, 0.5); }
+            to { box-shadow: 0 0 30px rgba(255, 0, 255, 0.8); }
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <div id="info" class="glow">
+        <h3>🎮 3D COORDINATE SYSTEM</h3>
+        <p>🖱️ Use mouse to rotate, scroll to zoom</p>
+        <p><span class="highlight">🔴 Red:</span> X-axis | <span class="highlight">🔵 Blue:</span> Y-axis | <span class="highlight">🟢 Green:</span> Z-axis</p>
+    </div>
+    
+    <div id="toggle">
+        <h4>📊 BIVARIATE CDF TYPE</h4>
+        <button class="toggle-btn active" onclick="switchToContinuous()">CONTINUOUS</button>
+        <button class="toggle-btn" onclick="switchToDiscrete()">DISCRETE</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
