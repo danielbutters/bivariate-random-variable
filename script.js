@@ -1,19 +1,48 @@
 // Scene setup
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ 
+    antialias: true,
+    powerPreference: "high-performance"
+});
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x1a1a1a); // Dark charcoal background
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for performance
 document.getElementById('container').appendChild(renderer.domElement);
 
 // Camera position
 camera.position.set(10, 10, 10);
 camera.lookAt(0, 0, 0);
 
-// Orbit controls
+// Orbit controls with responsive settings
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
+controls.enableZoom = true;
+controls.enablePan = true;
+controls.enableRotate = true;
+
+// Responsive camera settings
+const isMobile = window.innerWidth <= 768;
+const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+
+if (isMobile) {
+    // Mobile optimizations
+    controls.enablePan = false; // Disable pan on mobile to prevent accidental movement
+    controls.maxDistance = 30;
+    controls.minDistance = 5;
+    camera.position.set(15, 15, 15); // Further back for mobile
+} else if (isTablet) {
+    // Tablet optimizations
+    controls.maxDistance = 25;
+    controls.minDistance = 8;
+    camera.position.set(12, 12, 12);
+} else {
+    // Desktop settings
+    controls.maxDistance = 40;
+    controls.minDistance = 3;
+    camera.position.set(10, 10, 10);
+}
 
 // Grid parameters
 const gridSize = 10;
@@ -157,6 +186,27 @@ function createTicks() {
 function createLabels() {
     const labelsGroup = new THREE.Group();
     
+    // Responsive label settings
+    const isMobile = window.innerWidth <= 768;
+    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    
+    let canvasWidth = 64;
+    let canvasHeight = 32;
+    let fontSize = 'bold 16px monospace';
+    let scale = 2;
+    
+    if (isMobile) {
+        canvasWidth = 48;
+        canvasHeight = 24;
+        fontSize = 'bold 12px monospace';
+        scale = 1.5;
+    } else if (isTablet) {
+        canvasWidth = 56;
+        canvasHeight = 28;
+        fontSize = 'bold 14px monospace';
+        scale = 1.8;
+    }
+    
     // Create labels for each axis
     for (let i = -gridSize; i <= gridSize; i++) {
         if (i === 0) continue; // Skip origin
@@ -164,15 +214,15 @@ function createLabels() {
         // Create individual canvas for each number
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        canvas.width = 64;
-        canvas.height = 32;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
         
         // Clear canvas with transparent background
         context.clearRect(0, 0, canvas.width, canvas.height);
         
         // Add text (no background)
         context.fillStyle = '#ffffff'; // White text
-        context.font = 'bold 16px monospace';
+        context.font = fontSize;
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         context.fillText(i.toString(), canvas.width / 2, canvas.height / 2);
@@ -189,19 +239,19 @@ function createLabels() {
         // X-axis labels (positioned along X-axis)
         const xLabel = sprite.clone();
         xLabel.position.set(i, 0, -1.5);
-        xLabel.scale.set(2, 1, 1);
+        xLabel.scale.set(scale, scale * 0.5, 1);
         labelsGroup.add(xLabel);
         
         // Y-axis labels (positioned along Y-axis)
         const yLabel = sprite.clone();
         yLabel.position.set(-1.5, i, 0);
-        yLabel.scale.set(2, 1, 1);
+        yLabel.scale.set(scale, scale * 0.5, 1);
         labelsGroup.add(yLabel);
         
         // Z-axis labels (positioned along Z-axis)
         const zLabel = sprite.clone();
         zLabel.position.set(-1.5, 0, i);
-        zLabel.scale.set(2, 1, 1);
+        zLabel.scale.set(scale, scale * 0.5, 1);
         labelsGroup.add(zLabel);
     }
     
@@ -354,12 +404,55 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// Handle window resize
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+// Handle window resize and orientation changes
+function handleResize() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // Update camera aspect ratio
+    camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    
+    // Update renderer size
+    renderer.setSize(width, height);
+    
+    // Update pixel ratio for performance
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
+    // Recalculate responsive settings
+    const isMobile = width <= 768;
+    const isTablet = width > 768 && width <= 1024;
+    
+    if (isMobile) {
+        controls.enablePan = false;
+        controls.maxDistance = 30;
+        controls.minDistance = 5;
+    } else if (isTablet) {
+        controls.enablePan = true;
+        controls.maxDistance = 25;
+        controls.minDistance = 8;
+    } else {
+        controls.enablePan = true;
+        controls.maxDistance = 40;
+        controls.minDistance = 3;
+    }
+}
+
+// Listen for resize and orientation changes
+window.addEventListener('resize', handleResize);
+window.addEventListener('orientationchange', () => {
+    // Wait for orientation change to complete
+    setTimeout(handleResize, 100);
 });
+
+// Handle touch events for better mobile experience
+renderer.domElement.addEventListener('touchstart', (event) => {
+    event.preventDefault();
+}, { passive: false });
+
+renderer.domElement.addEventListener('touchmove', (event) => {
+    event.preventDefault();
+}, { passive: false });
 
 // Start animation
 animate();
